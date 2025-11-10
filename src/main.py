@@ -44,13 +44,7 @@ def main():
     generate_database_statistics(engine)
 
     # Step 5: Compare recommendation strategies
-    strategies = compare_recommendation_strategies(engine, num_articles=10)
-
-    # Step 6: Explain and visualize similarity
-    if strategies.get("random_titles"):
-        target = strategies["random_titles"][0]
-        explanation = explain_similarity(engine, strategies["random_titles"][:3], target)
-        visualize_similarity_explanation(explanation, save_path="../plots/explanation_example.png")
+    compare_recommendation_strategies(engine, num_articles=10)
 
     print("\n" + "=" * 80)
     print("PIPELINE COMPLETED SUCCESSFULLY")

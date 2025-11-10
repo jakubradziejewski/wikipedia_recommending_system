@@ -1,6 +1,7 @@
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from src.utils.visualization import visualize_strategy_comparison
+from src.engine.explainability import explain_similarity, visualize_similarity_explanation
 
 
 def compare_recommendation_strategies(engine, num_articles=10):
@@ -113,6 +114,43 @@ def compare_recommendation_strategies(engine, num_articles=10):
     print(f"\nTop 10 Recommendations (Recursive Query):")
     for idx, row in recursive_recs.iterrows():
         print(f"  {row['title'][:55]:55s} | Score: {row['similarity_score']:.4f}")
+
+        # =====================================================================
+        # EXPLAINABILITY SECTION (for each strategy)
+        # =====================================================================
+    print("\n" + "=" * 80)
+    print("EXPLAINABILITY COMPARISONS")
+    print("=" * 80)
+
+    explain_cases = [
+        ("Random", random_titles, random_recs),
+        ("Similar", similar_titles, similar_recs),
+        ("Weighted", weighted_titles, weighted_recs),
+        ("Recursive", recursive_titles, recursive_recs),
+    ]
+
+    for label, query_list, rec_df in explain_cases:
+        if rec_df is not None and not rec_df.empty:
+            target_title = rec_df.iloc[0]["title"]
+            print(f"\n{'-' * 80}")
+            print(f"🔍 Explainability for {label} Strategy")
+            print(f"Target article: {target_title}")
+            print(f"Based on {len(query_list)} query articles")
+            print(f"{'-' * 80}")
+
+            explanation = explain_similarity(
+                engine,
+                query_identifiers=query_list,
+                target_article=target_title,
+                top_terms=15,
+                verbose=True
+            )
+
+            # Save visualization per strategy
+            save_name = f"../plots/explainability_{label.lower()}.png"
+            visualize_similarity_explanation(explanation, save_path=save_name)
+        else:
+            print(f"\n⚠ No recommendations found for {label} strategy — skipping explainability.")
 
     print("\n" + "=" * 80)
     print("Analysis of Recommendation Strategies")

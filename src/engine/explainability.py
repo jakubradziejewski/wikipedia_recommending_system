@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from sklearn.metrics.pairwise import cosine_similarity
 
 
-def explain_similarity(engine, query_identifiers, target_article, top_terms=15):
+def explain_similarity(engine, query_identifiers, target_article, top_terms=15, verbose=True):
     """
     Explain why a target article is similar to given query articles.
 
@@ -13,6 +13,7 @@ def explain_similarity(engine, query_identifiers, target_article, top_terms=15):
         query_identifiers (List[str]): List of article titles or URLs (queries)
         target_article (str): Title or URL of the target article
         top_terms (int): Number of top contributing terms to display
+        verbose (bool): Whether to print detailed explanation in console
 
     Returns:
         dict: Explanation with top terms and similarity details
@@ -51,21 +52,32 @@ def explain_similarity(engine, query_identifiers, target_article, top_terms=15):
                 "target_tfidf": target_vec[idx],
             })
 
-    return {
+    explanation = {
         "query_articles": [engine.df.iloc[i]["title"] for i in query_indices],
         "target_article": engine.df.iloc[target_idx]["title"],
         "similarity_score": similarity,
         "top_terms": top_terms_data,
     }
 
+    # Console output (mirroring similarities_mathing.py style)
+    if verbose:
+        print(f"\nWhy is '{explanation['target_article']}' recommended?")
+        print(f"Overall similarity score: {explanation['similarity_score']:.4f}\n")
+        print("\nTop contributing terms:")
+        for i, term_data in enumerate(explanation["top_terms"][:top_terms], 1):
+            print(f"  {i:2d}. '{term_data['term']}' - contribution: {term_data['contribution']:.5f}")
 
-def visualize_similarity_explanation(explanation, save_path=None):
+    return explanation
+
+
+def visualize_similarity_explanation(explanation, save_path=None, show=True):
     """
     Visualize the output of explain_similarity() with contribution and TF-IDF comparisons.
 
     Args:
         explanation (dict): Output from explain_similarity()
         save_path (str): Optional file path to save the figure
+        show (bool): Whether to display the figure interactively
     """
     if not explanation or "top_terms" not in explanation:
         print("⚠ No explanation data to visualize.")
@@ -110,7 +122,7 @@ def visualize_similarity_explanation(explanation, save_path=None):
     ax2.legend(fontsize=10)
     ax2.grid(axis="y", alpha=0.3)
 
-    # Info text at top
+    # Info text
     query_text = "Query: " + ", ".join(explanation["query_articles"][:2])
     if len(explanation["query_articles"]) > 2:
         query_text += f" + {len(explanation['query_articles']) - 2} more"
@@ -125,4 +137,5 @@ def visualize_similarity_explanation(explanation, save_path=None):
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
         print(f"✓ Visualization saved to {save_path}")
 
-    plt.show()
+    if show:
+        plt.show()
