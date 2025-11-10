@@ -36,11 +36,9 @@ def main():
     perform_text_analysis(data_path)
 
     # Step 3: Build similarity engine
-    print("\n" + "=" * 80)
-    print("BUILDING SIMILARITY ENGINE")
-    print("=" * 80)
+    print("Building Article Similarity Engine using Text after Lemmatization\n")
     engine = ArticleSimilarityEngine(data_path)
-    engine.build_tfidf_model(use_lemmas=True, max_features=20000, ngram_range=(1, 2))
+    engine.build_tfidf_model(max_features=20000)
 
     # Step 4: Generate statistics
     generate_database_statistics(engine)

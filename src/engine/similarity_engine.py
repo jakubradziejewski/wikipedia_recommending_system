@@ -23,12 +23,9 @@ class ArticleSimilarityEngine:
         Args:
             parquet_file: Path to the parquet file containing scraped articles
         """
-        print("=" * 80)
-        print("INITIALIZING ARTICLE SIMILARITY ENGINE")
-        print("=" * 80)
 
         self.df = pd.read_parquet(parquet_file)
-        print(f"✓ Loaded {len(self.df)} articles from {parquet_file}")
+        print(f"Loaded {len(self.df)} articles from {parquet_file}")
 
         # Create URL to index mapping for quick lookups
         self.url_to_idx = {url: idx for idx, url in enumerate(self.df['url'])}
@@ -39,50 +36,39 @@ class ArticleSimilarityEngine:
         self.tfidf_matrix = None
         self.feature_names = None
 
-        print("✓ Engine initialized successfully\n")
+        print("Engine initialized successfully\n")
 
-    def build_tfidf_model(self, use_lemmas=True, max_features=10000, ngram_range=(1, 2)):
+    def build_tfidf_model(self, max_features=10000):
         """
         Build TF-IDF model from the article corpus
 
         Args:
-            use_lemmas: Whether to use lemmatized text (True) or regular tokens (False)
             max_features: Maximum number of features to extract
-            ngram_range: Range of n-grams to consider (1,1) for unigrams, (1,2) for unigrams+bigrams
         """
-        print("-" * 80)
-        print("BUILDING TF-IDF MODEL")
-        print("-" * 80)
 
-        # Choose text column
-        text_column = 'lemmas' if use_lemmas else 'tokens'
+        print("Building TF-IDF Model")
+
+        # Choose text column, we use lemmatized text
+        text_column = 'lemmas'
         texts = self.df[text_column].fillna('')
 
-        print(f"Configuration:")
-        print(f"  - Text type: {'Lemmatized' if use_lemmas else 'Tokenized'}")
         print(f"  - Max features: {max_features}")
-        print(f"  - N-gram range: {ngram_range}")
         print(f"  - Documents: {len(texts)}")
 
         # Create TF-IDF vectorizer
         self.vectorizer = TfidfVectorizer(
             max_features=max_features,
-            ngram_range=ngram_range,
-            min_df=2,  # Ignore terms that appear in less than 2 documents
+            ngram_range=(1, 2),
+            min_df=5,  # Ignore terms that appear in less than 2 documents
             max_df=0.8,  # Ignore terms that appear in more than 80% of documents
             sublinear_tf=True  # Use sublinear term frequency scaling
         )
 
         # Fit and transform
-        print("\n⏳ Computing TF-IDF matrix...")
+        print("\nComputing TF-IDF matrix...")
         self.tfidf_matrix = self.vectorizer.fit_transform(texts)
         self.feature_names = self.vectorizer.get_feature_names_out()
 
-        print(f"✓ TF-IDF matrix shape: {self.tfidf_matrix.shape}")
-        print(f"✓ Vocabulary size: {len(self.feature_names)}")
-        print(
-            f"✓ Matrix density: {self.tfidf_matrix.nnz / (self.tfidf_matrix.shape[0] * self.tfidf_matrix.shape[1]):.4%}")
-        print()
 
     def _find_article_index(self, identifier: str) -> Optional[int]:
         """Find article index by URL or title"""
@@ -102,9 +88,6 @@ class ArticleSimilarityEngine:
 
         return None
 
-    # ============================================================================
-    # RECOMMENDATION METHODS
-    # ============================================================================
 
     def find_similar_articles(self,
                               query_identifiers: List[str],
@@ -140,13 +123,6 @@ class ArticleSimilarityEngine:
         if not query_indices:
             print("⚠ No valid articles found in the query!")
             return pd.DataFrame()
-
-        print(f"\n🔍 Query articles found: {len(query_indices)}")
-        for i, title in enumerate(found_articles):
-            if weights:
-                print(f"  • {title} (weight: {weights[i]:.2f})")
-            else:
-                print(f"  • {title}")
 
         # Get the vectors
         query_vectors = self.tfidf_matrix[query_indices]
