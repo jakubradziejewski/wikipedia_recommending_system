@@ -114,11 +114,6 @@ def compare_recommendation_strategies(engine, num_articles=10, run_explainabilit
 
     # Optional: Run deep explainability on all strategies
     if run_explainability:
-
-        print("\n" + "=" * 80)
-        print("RUNNING DEEP EXPLAINABILITY ANALYSIS FOR ALL STRATEGIES")
-        print("=" * 80)
-
         deep_explainability_analysis(
             engine,
             random_data["titles"],

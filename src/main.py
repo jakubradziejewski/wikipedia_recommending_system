@@ -48,7 +48,7 @@ def main():
     compare_recommendation_strategies(engine, num_articles=10)
 
     # Step 6: Query size impact analysis
-    analyze_query_size_impact(engine, max_query_size=100)
+    analyze_query_size_impact(engine, max_query_size=1000)
 
     print("\n" + "=" * 80)
     print("PIPELINE COMPLETED SUCCESSFULLY")

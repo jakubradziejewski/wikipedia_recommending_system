@@ -62,15 +62,13 @@ def deep_explainability_analysis(engine, query_identifiers, top_recommendations,
         print("⚠ Could not perform deep analysis - missing data.")
         return {}
 
-    print("\n" + "=" * 80)
-    print(f"DEEP EXPLAINABILITY ANALYSIS: {strategy_name}")
-    print("=" * 80)
+    print(f"Explainability analysis for {strategy_name}")
 
     # Compute query vector
     query_vec = np.asarray(engine.tfidf_matrix[query_indices].mean(axis=0)).flatten()
 
     # Identify distinctive terms in query set
-    print("\n🔍 Identifying distinctive terms in query set...")
+    print("\nIdentifying distinctive terms in query set...")
 
     distinctive_terms = []
     for term_idx in np.where(query_vec > 0)[0]:
