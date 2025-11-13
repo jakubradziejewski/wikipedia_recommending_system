@@ -1,8 +1,6 @@
 import numpy as np
-from src.utils.visualization import visualize_strategy_comparison
-from src.engine.explainability import compare_recommendations_with_insights, visualize_recommendation_breakdown
 from sklearn.metrics.pairwise import cosine_similarity
-
+from src.analysis.explainability import deep_explainability_analysis
 
 def compute_internal_coherence(matrix):
     """Compute average cosine similarity within a collection of article vectors."""
@@ -59,7 +57,6 @@ def similar_strategy(engine, num_articles):
 
     print_article_list(query_titles, label="Query articles (seed + similar ones)")
 
-
     avg_sim = compute_internal_coherence(engine.tfidf_matrix[similar_indices])
     print(f"\nInternal coherence (avg similarity): {avg_sim:.4f}")
 
@@ -96,82 +93,59 @@ def recursive_strategy(engine, num_articles):
     return {"titles": titles, "indices": indices, "recs": recs, "coherence": avg_sim}
 
 
-def deep_explainability_analysis(engine, data):
-    """Optional deep explainability step for random strategy results."""
-    print("\n" + "=" * 80)
-    print(f"DEEP EXPLAINABILITY ANALYSIS FOR {data}")
-    print("=" * 80)
-
-    recs = data["recs"]
-    titles = data["titles"]
-
-    if recs is not None and not recs.empty:
-        print("\n🔍 Performing deep analysis of recommendation decisions...")
-
-        top_candidates = recs.head(5)['title'].tolist()
-        comparison = compare_recommendations_with_insights(
-            engine,
-            query_identifiers=titles,
-            candidate_articles=top_candidates,
-            top_k=5
-        )
-
-        print("\n" + "-" * 80)
-        print("WHY ARTICLES RANK IN THIS ORDER:")
-        print("-" * 80)
-
-        for i, comp in enumerate(comparison['comparisons'], 1):
-            print(f"\n#{i} - {comp['article']}")
-            print(f"  Similarity Score: {comp['similarity']:.4f}")
-            print(f"  Feature Overlap: {comp['overlap_ratio'] * 100:.1f}% "
-                  f"({comp['overlap_features']}/{comp['query_features']} query features)")
-            print(f"  Key differentiators:")
-
-            for j, term in enumerate(comp['top_terms'][:3], 1):
-                print(f"    {j}. '{term['term']}' → contribution: {term['contribution']:.5f}")
-
-            if i > 1:
-                prev = comparison['comparisons'][i - 2]
-                sim_diff = comp['similarity'] - prev['similarity']
-                overlap_diff = comp['overlap_ratio'] - prev['overlap_ratio']
-                print(f"\n  Why ranked lower than #{i - 1}?")
-                if sim_diff < 0:
-                    print(f"    • Lower similarity by {abs(sim_diff):.4f}")
-                if overlap_diff < 0:
-                    print(f"    • Less feature overlap ({overlap_diff * 100:.1f}% fewer shared features)")
-                unique_prev = {t['term'] for t in prev['top_terms'][:5]} - {t['term'] for t in comp['top_terms'][:5]}
-                if unique_prev:
-                    print(f"    • Higher-ranked article has unique strong terms: {', '.join(list(unique_prev)[:3])}")
-
-        print("\nGenerating visualization 1: Recommendation Breakdown...")
-        visualize_recommendation_breakdown(
-            comparison,
-            save_path='../plots/explainability_breakdown_random.png',
-            show=False
-        )
-
-        print("\n✓ Deep explainability analysis complete!")
-        print("✓ Visualizations saved to ../plots/")
-
-
-def compare_recommendation_strategies(engine, num_articles=10, deep_explainability=True):
+def compare_recommendation_strategies(engine, num_articles=10, run_explainability=True):
     """
     Compare recommendations from multiple query selection strategies.
+
+    Args:
+        engine: ArticleSimilarityEngine instance
+        num_articles: Number of articles to use in query set
+        run_explainability: Whether to run deep explainability analysis on all strategies
+
+    Returns:
+        dict: Results from all strategies
     """
-    print("Approaches of recommendation based on different query article selection strategies:")
+    print("\nApproaches of recommendation based on different query article selection strategies:")
 
     # Run each strategy modularly
     random_data = random_strategy(engine, num_articles)
     similar_data = similar_strategy(engine, num_articles)
     recursive_data = recursive_strategy(engine, num_articles)
 
-    # Deep explainability (optional)
-    if deep_explainability:
-        deep_explainability_analysis(engine, random_data)
+    # Optional: Run deep explainability on all strategies
+    if run_explainability:
+
+        print("\n" + "=" * 80)
+        print("RUNNING DEEP EXPLAINABILITY ANALYSIS FOR ALL STRATEGIES")
+        print("=" * 80)
+
+        deep_explainability_analysis(
+            engine,
+            random_data["titles"],
+            random_data["recs"],
+            strategy_name="Random Strategy",
+            min_enrichment=2.0
+        )
+
+        deep_explainability_analysis(
+            engine,
+            similar_data["titles"],
+            similar_data["recs"],
+            strategy_name="Similar Strategy",
+            min_enrichment=2.0
+        )
+
+        deep_explainability_analysis(
+            engine,
+            recursive_data["titles"],
+            recursive_data["recs"],
+            strategy_name="Recursive Strategy",
+            min_enrichment=2.0
+        )
 
     # Final summary comparison
     print("\n" + "=" * 80)
-    print("Analysis of Recommendation Strategies")
+    print("STRATEGY COMPARISON SUMMARY")
     print("=" * 80)
 
     print(f"\nInternal Coherence within query articles:")
@@ -189,13 +163,7 @@ def compare_recommendation_strategies(engine, num_articles=10, deep_explainabili
     print(f"  Similar  : {similar_data['recs']['similarity_score'].mean():.4f}")
     print(f"  Recursive: {recursive_data['recs']['similarity_score'].mean():.4f}")
 
-    # Visualization
-    visualize_strategy_comparison(
-        engine,
-        random_data["indices"], similar_data["indices"],
-        random_data["recs"], similar_data["recs"],
-        random_data["coherence"], similar_data["coherence"]
-    )
+
 
     return {
         'random': random_data,

@@ -1,3 +1,5 @@
+# engine/statistics.py
+import numpy as np
 import os
 import pandas as pd
 from collections import Counter
@@ -81,3 +83,32 @@ def perform_text_analysis(parquet_file="data/wikipedia_articles.parquet"):
     print(f"Vocabulary reduction through stemming: {vocab_reduction_stem:.1f}%")
     print(f"Vocabulary reduction through lemmatization: {vocab_reduction_lemma:.1f}%")
 
+def generate_model_statistics(engine):
+    """Generate comprehensive statistics and visualizations for the article corpus"""
+
+    if engine.tfidf_matrix is None:
+        print("⚠ TF-IDF model not built. Building now...")
+        engine.build_tfidf_model()
+
+    tfidf = engine.tfidf_matrix
+    df = engine.df
+
+    # 1. TF-IDF Statistics
+    print("\n" + "-" * 80)
+    print("TF-IDF MODEL STATISTICS")
+    print("-" * 80)
+    print(f"Total documents: {tfidf.shape[0]:,}")
+    print(f"Vocabulary size: {tfidf.shape[1]:,}")
+    density = tfidf.nnz / (tfidf.shape[0] * tfidf.shape[1])
+    print(f"Matrix density: {density:.4%}")
+    print(f"Non-zero elements: {tfidf.nnz:,}")
+
+    # 2. Top TF-IDF terms across corpus
+    print("\n" + "-" * 80)
+    print("TOP TF-IDF TERMS (Corpus-wide)")
+    print("-" * 80)
+    tfidf_sums = np.array(tfidf.sum(axis=0)).flatten()
+    top_indices = np.argsort(tfidf_sums)[-20:][::-1]
+    print("\nTop 20 terms by cumulative TF-IDF score:")
+    for i, idx in enumerate(top_indices, 1):
+        print(f"  {i:2d}. {engine.feature_names[idx]:20s} (score: {tfidf_sums[idx]:.2f})")

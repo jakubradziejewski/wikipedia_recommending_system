@@ -4,13 +4,13 @@ from scrapy.crawler import CrawlerProcess
 
 # Local imports
 from src.spider.wikipedia_spider import WikipediaSpider
-from src.analysis.text_analysis import perform_text_analysis
+from src.analysis.statistics import perform_text_analysis
 
 from src.engine.similarity_engine import ArticleSimilarityEngine
-from src.engine.statistics import generate_database_statistics
+from src.analysis.statistics import generate_model_statistics
 from src.engine.strategy import compare_recommendation_strategies
 
-from src.engine.query_size_analysis import analyze_query_size_impact
+from src.analysis.query_size_analysis import analyze_query_size_impact
 
 
 def main():
@@ -42,7 +42,7 @@ def main():
     engine.build_tfidf_model(max_features=20000)
 
     # Step 4: Generate statistics
-    generate_database_statistics(engine)
+    generate_model_statistics(engine)
 
     # Step 5: Compare recommendation strategies
     compare_recommendation_strategies(engine, num_articles=10)
