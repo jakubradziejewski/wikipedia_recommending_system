@@ -59,8 +59,8 @@ class ArticleSimilarityEngine:
         self.vectorizer = TfidfVectorizer(
             max_features=max_features,
             ngram_range=(1, 2),
-            min_df=5,  # Ignore terms that appear in less than 2 documents
-            max_df=0.8,  # Ignore terms that appear in more than 80% of documents
+            min_df=15,  # Ignore terms that appear in less than 2 documents
+            max_df=0.60,  # Ignore terms that appear in more than 70% of documents
             sublinear_tf=True  # Use sublinear term frequency scaling
         )
 

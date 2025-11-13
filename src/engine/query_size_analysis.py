@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from sklearn.metrics.pairwise import cosine_similarity
 
 
-def analyze_query_size_impact(engine, seed_article=None, max_query_size=20):
+def analyze_query_size_impact(engine, seed_article=None, max_query_size=1000):
     """
     Analyze how recommendation quality changes with query size.
 
@@ -46,7 +46,7 @@ def analyze_query_size_impact(engine, seed_article=None, max_query_size=20):
         'recommendation_diversity': []  # How different are top recommendations
     }
 
-    query_sizes = [1, 2, 3, 5, 7, 10, 15, 20]
+    query_sizes = [1, 3, 5, 10, 15, 25, 50, 100]
 
     for size in query_sizes:
         if size > len(similar_indices):
@@ -114,65 +114,77 @@ def analyze_query_size_impact(engine, seed_article=None, max_query_size=20):
     _visualize_query_size_impact(results, seed_title)
 
     return pd.DataFrame(results)
-
-
 def _visualize_query_size_impact(results, seed_title):
-    """Create comprehensive visualization of query size impact"""
+    """Create adaptive visualization of query size impact (correct scaling)."""
+
+    import matplotlib.ticker as ticker
+
+    df = pd.DataFrame(results).sort_values('query_size')
+    query_sizes = df['query_size'].to_numpy()
+    max_q = int(np.max(query_sizes))
 
     fig, axes = plt.subplots(2, 2, figsize=(16, 12))
-    fig.suptitle(f'Impact of Query Size on Recommendations\nSeed: {seed_title}',
-                 fontsize=16, fontweight='bold', y=0.995)
+    fig.suptitle(
+        f'Impact of Query Size on Recommendations\nSeed: {seed_title}',
+        fontsize=16, fontweight='bold', y=0.995
+    )
 
-    query_sizes = results['query_size']
+    # Helper to fix axis scaling properly
+    def fix_axis(ax):
+        ax.set_xlim(0, max_q * 1.05)
+        ax.set_xticks(query_sizes)
+        ax.xaxis.set_major_locator(ticker.FixedLocator(query_sizes))
+        ax.xaxis.set_minor_locator(ticker.NullLocator())
+        ax.tick_params(axis='x', rotation=45)
+        ax.grid(True, alpha=0.3)
 
     # Plot 1: Similarity scores vs query size
     ax1 = axes[0, 0]
-    ax1.plot(query_sizes, results['avg_similarity'], 'o-', linewidth=2,
+    ax1.plot(query_sizes, df['avg_similarity'], 'o-', linewidth=2,
              markersize=8, label='Average', color='steelblue')
-    ax1.plot(query_sizes, results['max_similarity'], 's--', linewidth=2,
-             markersize=6, label='Maximum', color='coral', alpha=0.7)
-    ax1.fill_between(query_sizes, results['min_similarity'], results['max_similarity'],
-                     alpha=0.2, color='steelblue')
+    ax1.plot(query_sizes, df['max_similarity'], 's--', linewidth=2,
+             markersize=6, label='Maximum', color='coral', alpha=0.8)
+    ax1.fill_between(query_sizes, df['min_similarity'], df['max_similarity'],
+                     alpha=0.2, color='steelblue', label='Range')
     ax1.set_xlabel('Query Size (number of articles)', fontsize=11, fontweight='bold')
     ax1.set_ylabel('Similarity Score', fontsize=11, fontweight='bold')
     ax1.set_title('Recommendation Quality vs Query Size', fontsize=12, fontweight='bold')
+    fix_axis(ax1)
     ax1.legend(fontsize=10)
-    ax1.grid(True, alpha=0.3)
-    ax1.set_xticks(query_sizes)
 
     # Plot 2: Internal coherence
     ax2 = axes[0, 1]
-    ax2.plot(query_sizes, results['internal_coherence'], 'o-',
+    ax2.plot(query_sizes, df['internal_coherence'], 'o-',
              linewidth=2, markersize=8, color='darkgreen')
-    ax2.set_xlabel('Query Size (number of articles)', fontsize=11, fontweight='bold')
+    ax2.set_xlabel('Query Size', fontsize=11, fontweight='bold')
     ax2.set_ylabel('Internal Coherence', fontsize=11, fontweight='bold')
     ax2.set_title('Query Collection Coherence', fontsize=12, fontweight='bold')
-    ax2.grid(True, alpha=0.3)
-    ax2.set_xticks(query_sizes)
+    fix_axis(ax2)
     ax2.axhline(y=0.5, color='r', linestyle='--', alpha=0.5, label='Threshold')
     ax2.legend()
 
-    # Plot 3: Stability (std deviation)
+    # Plot 3: Stability (standard deviation)
     ax3 = axes[1, 0]
-    ax3.plot(query_sizes, results['std_similarity'], 'o-',
+    ax3.plot(query_sizes, df['std_similarity'], 'o-',
              linewidth=2, markersize=8, color='purple')
-    ax3.set_xlabel('Query Size (number of articles)', fontsize=11, fontweight='bold')
+    ax3.set_xlabel('Query Size', fontsize=11, fontweight='bold')
     ax3.set_ylabel('Standard Deviation', fontsize=11, fontweight='bold')
     ax3.set_title('Recommendation Stability', fontsize=12, fontweight='bold')
-    ax3.grid(True, alpha=0.3)
-    ax3.set_xticks(query_sizes)
+    fix_axis(ax3)
 
-    # Plot 4: Diversity
+    # Plot 4: Diversity of recommendations
     ax4 = axes[1, 1]
-    ax4.plot(query_sizes, results['recommendation_diversity'], 'o-',
-             linewidth=2, markersize=8, color='darkorange')
-    ax4.set_xlabel('Query Size (number of articles)', fontsize=11, fontweight='bold')
+    if 'recommendation_diversity' in df:
+        ax4.plot(query_sizes, df['recommendation_diversity'], 'o-',
+                 linewidth=2, markersize=8, color='darkorange')
+    else:
+        ax4.plot(query_sizes, np.zeros_like(query_sizes), 'o-', color='gray', alpha=0.5)
+    ax4.set_xlabel('Query Size', fontsize=11, fontweight='bold')
     ax4.set_ylabel('Diversity Score', fontsize=11, fontweight='bold')
     ax4.set_title('Recommendation Diversity', fontsize=12, fontweight='bold')
-    ax4.grid(True, alpha=0.3)
-    ax4.set_xticks(query_sizes)
+    fix_axis(ax4)
 
-    plt.tight_layout()
+    plt.tight_layout(rect=[0, 0, 1, 0.97])
     plt.savefig('../plots/query_size_impact.png', dpi=300, bbox_inches='tight')
     print(f"\n✓ Query size impact visualization saved to '../plots/query_size_impact.png'")
     plt.close()

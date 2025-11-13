@@ -1,11 +1,6 @@
 # engine/statistics.py
 import numpy as np
-import matplotlib.pyplot as plt
 from sklearn.metrics.pairwise import cosine_similarity
-import pandas as pd
-from src.utils import *
-from src.utils.visualization import create_top_similarities_table
-
 
 def generate_database_statistics(engine):
     """Generate comprehensive statistics and visualizations for the article corpus"""
@@ -49,9 +44,6 @@ def generate_database_statistics(engine):
     upper_indices = np.triu_indices_from(sample_similarity, k=1)
     print(f"\nAverage similarity: {sample_similarity[upper_indices].mean():.4f}")
     print(f"Max similarity (non-diagonal): {sample_similarity[upper_indices].max():.4f}")
-
-    # 5. Visualizations
-    create_top_similarities_table(df, tfidf, tfidf.shape[0])
 
 
 

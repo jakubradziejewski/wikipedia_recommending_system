@@ -10,7 +10,7 @@ class WikipediaSpider(scrapy.Spider):
 
     name = 'wikipedia_spider'
     allowed_domains = ['en.wikipedia.org']
-    start_urls = ['https://en.wikipedia.org/wiki/Poland']
+    start_urls = ['https://en.wikipedia.org/wiki/Madagascar']
 
     custom_settings = {
         'ROBOTSTXT_OBEY': True,
@@ -31,7 +31,7 @@ class WikipediaSpider(scrapy.Spider):
     def __init__(self, *args, **kwargs):
         super(WikipediaSpider, self).__init__(*args, **kwargs)
         self.visited_urls = set()
-        self.max_pages = 51
+        self.max_pages = 5000
         self.max_links_per_page = 10
         self.pages_scraped = 0
         self.data = []
