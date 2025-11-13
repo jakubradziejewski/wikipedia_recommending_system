@@ -1,22 +1,29 @@
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from src.utils.visualization import visualize_strategy_comparison
-from src.engine.explainability import explain_similarity, visualize_similarity_explanation
+from src.engine.explainability import compare_recommendations_with_insights, visualize_recommendation_breakdown
 
-
-def compare_recommendation_strategies(engine, num_articles=10):
+def compare_recommendation_strategies(engine, num_articles=10, deep_explainability=True):
     """
     Compare recommendations from multiple query selection strategies:
       1. Random Article Collection
       2. Similar (connected) Article Collection
       3. Weighted Query Strategy
       4. Recursive Query Expansion
+
+    Args:
+        engine: ArticleSimilarityEngine instance
+        num_articles: Number of articles to use in query
+        deep_explainability: If True, perform detailed explainability analysis
     """
     print("\n" + "-" * 80)
     print("Approaches of recommendation based on different query article selection strategies:")
     print("-" * 80)
 
-    print("\n11. Random Article Collection")
+    # ========================================================================
+    # Strategy 1: Random Article Collection
+    # ========================================================================
+    print("\n1. Random Article Collection")
     random_indices = np.random.choice(len(engine.df), size=num_articles, replace=False)
     random_titles = engine.df.iloc[random_indices]['title'].tolist()
 
@@ -35,6 +42,9 @@ def compare_recommendation_strategies(engine, num_articles=10):
     for idx, row in random_recs.iterrows():
         print(f"  {row['title'][:55]:55s} | Score: {row['similarity_score']:.4f}")
 
+    # ========================================================================
+    # Strategy 2: Similar Article Collection
+    # ========================================================================
     print("\n2. Similar Article Collection based on randomly chosen seed article")
     seed_idx = np.random.choice(len(engine.df))
     seed_title = engine.df.iloc[seed_idx]['title']
@@ -61,6 +71,9 @@ def compare_recommendation_strategies(engine, num_articles=10):
     for idx, row in similar_recs.iterrows():
         print(f"  {row['title'][:55]:55s} | Score: {row['similarity_score']:.4f}")
 
+    # ========================================================================
+    # Strategy 3: Weighted Query
+    # ========================================================================
     print("\n3. Weighted Query Strategy (recent articles have higher importance)")
     last_articles = engine.df.tail(num_articles)
     weighted_titles = last_articles['title'].tolist()
@@ -85,6 +98,9 @@ def compare_recommendation_strategies(engine, num_articles=10):
     for idx, row in weighted_recs.iterrows():
         print(f"  {row['title'][:55]:55s} | Score: {row['similarity_score']:.4f}")
 
+    # ========================================================================
+    # Strategy 4: Recursive Query Expansion
+    # ========================================================================
     print("\n4. Recursive Query Expansion Strategy")
     print("Building query list step-by-step based on most similar previous selections.")
 
@@ -115,43 +131,79 @@ def compare_recommendation_strategies(engine, num_articles=10):
     for idx, row in recursive_recs.iterrows():
         print(f"  {row['title'][:55]:55s} | Score: {row['similarity_score']:.4f}")
 
-        # =====================================================================
-        # EXPLAINABILITY SECTION (for each strategy)
-        # =====================================================================
-    print("\n" + "=" * 80)
-    print("EXPLAINABILITY COMPARISONS")
-    print("=" * 80)
+    # ========================================================================
+    # DEEP EXPLAINABILITY SECTION (only for Random strategy)
+    # ========================================================================
+    if deep_explainability:
+        print("\n" + "=" * 80)
+        print("DEEP EXPLAINABILITY ANALYSIS - Random Strategy")
+        print("=" * 80)
 
-    explain_cases = [
-        ("Random", random_titles, random_recs),
-        ("Similar", similar_titles, similar_recs),
-        ("Weighted", weighted_titles, weighted_recs),
-        ("Recursive", recursive_titles, recursive_recs),
-    ]
+        if random_recs is not None and not random_recs.empty:
+            print("\n🔍 Performing deep analysis of recommendation decisions...")
 
-    for label, query_list, rec_df in explain_cases:
-        if rec_df is not None and not rec_df.empty:
-            target_title = rec_df.iloc[0]["title"]
-            print(f"\n{'-' * 80}")
-            print(f"🔍 Explainability for {label} Strategy")
-            print(f"Target article: {target_title}")
-            print(f"Based on {len(query_list)} query articles")
-            print(f"{'-' * 80}")
+            # Get top 5 recommendations for detailed comparison
+            top_candidates = random_recs.head(5)['title'].tolist()
 
-            explanation = explain_similarity(
+            # Compare recommendations with deep insights
+            comparison = compare_recommendations_with_insights(
                 engine,
-                query_identifiers=query_list,
-                target_article=target_title,
-                top_terms=15,
-                verbose=True
+                query_identifiers=random_titles,
+                candidate_articles=top_candidates,
+                top_k=5
             )
 
-            # Save visualization per strategy
-            save_name = f"../plots/explainability_{label.lower()}.png"
-            visualize_similarity_explanation(explanation, save_path=save_name)
-        else:
-            print(f"\n⚠ No recommendations found for {label} strategy — skipping explainability.")
+            # Print detailed insights
+            print("\n" + "-" * 80)
+            print("WHY ARTICLES RANK IN THIS ORDER:")
+            print("-" * 80)
 
+            for i, comp in enumerate(comparison['comparisons'], 1):
+                print(f"\n#{i} - {comp['article']}")
+                print(f"  Similarity Score: {comp['similarity']:.4f}")
+                print(f"  Feature Overlap: {comp['overlap_ratio'] * 100:.1f}% "
+                      f"({comp['overlap_features']}/{comp['query_features']} query features)")
+                print(f"  Key differentiators:")
+
+                if comp['top_terms']:
+                    for j, term in enumerate(comp['top_terms'][:3], 1):
+                        print(f"    {j}. '{term['term']}' → contribution: {term['contribution']:.5f}")
+
+                # Explain ranking differences
+                if i > 1:
+                    prev_comp = comparison['comparisons'][i - 2]
+                    sim_diff = comp['similarity'] - prev_comp['similarity']
+                    overlap_diff = comp['overlap_ratio'] - prev_comp['overlap_ratio']
+
+                    print(f"\n  Why ranked lower than #{i - 1}?")
+                    if sim_diff < 0:
+                        print(f"    • Lower similarity by {abs(sim_diff):.4f}")
+                    if overlap_diff < 0:
+                        print(f"    • Less feature overlap ({overlap_diff * 100:.1f}% fewer shared features)")
+
+                    # Find unique strong terms in higher-ranked article
+                    prev_terms = {t['term'] for t in prev_comp['top_terms'][:5]}
+                    curr_terms = {t['term'] for t in comp['top_terms'][:5]}
+                    unique_prev = prev_terms - curr_terms
+                    if unique_prev:
+                        print(
+                            f"    • Higher-ranked article has unique strong terms: {', '.join(list(unique_prev)[:3])}")
+
+            # Generate comprehensive visualizations
+            print("\n📊 Generating visualization 1: Recommendation Breakdown...")
+            visualize_recommendation_breakdown(
+                comparison,
+                save_path='../plots/explainability_breakdown_random.png',
+                show=False
+            )
+
+
+            print("\n✓ Deep explainability analysis complete!")
+            print("✓ Visualizations saved to ../plots/")
+
+    # ========================================================================
+    # STRATEGY COMPARISON SUMMARY
+    # ========================================================================
     print("\n" + "=" * 80)
     print("Analysis of Recommendation Strategies")
     print("=" * 80)
@@ -174,8 +226,7 @@ def compare_recommendation_strategies(engine, num_articles=10):
     print(f"  Weighted : {weighted_recs['similarity_score'].mean():.4f}")
     print(f"  Recursive: {recursive_recs['similarity_score'].mean():.4f}")
 
-
-
+    # Original comparison visualization
     visualize_strategy_comparison(
         engine, random_indices, similar_indices,
         random_recs, similar_recs,

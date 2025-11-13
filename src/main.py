@@ -7,9 +7,10 @@ from src.spider.wikipedia_spider import WikipediaSpider
 from src.analysis.text_analysis import perform_text_analysis
 
 from src.engine.similarity_engine import ArticleSimilarityEngine
-from src.engine.explainability import explain_similarity, visualize_similarity_explanation
 from src.engine.statistics import generate_database_statistics
 from src.engine.strategy import compare_recommendation_strategies
+
+from src.engine.query_size_analysis import analyze_query_size_impact
 
 
 def main():
@@ -45,6 +46,9 @@ def main():
 
     # Step 5: Compare recommendation strategies
     compare_recommendation_strategies(engine, num_articles=10)
+
+    # Step 6: Query size impact analysis
+    analyze_query_size_impact(engine, max_query_size=20)
 
     print("\n" + "=" * 80)
     print("PIPELINE COMPLETED SUCCESSFULLY")
