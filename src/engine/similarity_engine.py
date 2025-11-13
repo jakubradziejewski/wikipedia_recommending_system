@@ -133,7 +133,6 @@ class ArticleSimilarityEngine:
                 raise ValueError(
                     f"Number of weights ({len(weights)}) must match number of found query articles ({len(query_indices)}).")
 
-            print(f"\n📊 Applying custom weights")
 
             # Create a numpy array for weights, shaped for broadcasting
             weights_arr = np.array(weights).reshape(-1, 1)  # Shape (n_queries, 1)
@@ -149,7 +148,6 @@ class ArticleSimilarityEngine:
             avg_query_vector = np.asarray(weighted_sum_vector / sum_of_weights)
         else:
             # Simple mean
-            print("\n📊 Applying uniform weights (standard average)")
             avg_query_vector = np.asarray(query_vectors.mean(axis=0))
 
         # Compute similarities
