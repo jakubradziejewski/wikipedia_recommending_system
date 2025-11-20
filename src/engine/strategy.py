@@ -1,6 +1,6 @@
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
-from src.analysis.explainability import deep_explainability_analysis
+from src.analysis.explainability import explainability_analysis
 
 def compute_internal_coherence(matrix):
     """Compute average cosine similarity within a collection of article vectors."""
@@ -115,7 +115,7 @@ def compare_recommendation_strategies(engine, num_articles=10, run_explainabilit
 
     # Optional: Run deep explainability on all strategies
     if run_explainability:
-        deep_explainability_analysis(
+        explainability_analysis(
             engine,
             random_data["titles"],
             random_data["recs"],
@@ -123,7 +123,7 @@ def compare_recommendation_strategies(engine, num_articles=10, run_explainabilit
             min_enrichment=2.0
         )
 
-        deep_explainability_analysis(
+        explainability_analysis(
             engine,
             similar_data["titles"],
             similar_data["recs"],
@@ -131,7 +131,7 @@ def compare_recommendation_strategies(engine, num_articles=10, run_explainabilit
             min_enrichment=2.0
         )
 
-        deep_explainability_analysis(
+        explainability_analysis(
             engine,
             recursive_data["titles"],
             recursive_data["recs"],
