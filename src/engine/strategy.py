@@ -21,6 +21,7 @@ def print_article_list(titles, similarities=None, label="Articles"):
 def generate_recommendations(engine, titles, label="Top Recommendations"):
     """Generate and print top recommendations for a given query set."""
     recs = engine.find_similar_articles(titles, top_k=10)
+
     print(f"\n{label}:")
     for _, row in recs.iterrows():
         print(f"  {row['title'][:55]:55s} | Score: {row['similarity_score']:.4f}")
@@ -165,3 +166,4 @@ def compare_recommendation_strategies(engine, num_articles=10, run_explainabilit
         'similar': similar_data,
         'recursive': recursive_data
     }
+

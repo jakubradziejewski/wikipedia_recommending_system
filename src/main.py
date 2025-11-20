@@ -10,7 +10,6 @@ from src.engine.similarity_engine import ArticleSimilarityEngine
 from src.analysis.statistics import generate_model_statistics
 from src.engine.strategy import compare_recommendation_strategies
 
-from src.analysis.query_size_analysis import analyze_query_size_impact
 
 
 def main():
@@ -47,12 +46,8 @@ def main():
     # Step 5: Compare recommendation strategies
     compare_recommendation_strategies(engine, num_articles=10)
 
-    # Step 6: Query size impact analysis
-    analyze_query_size_impact(engine, max_query_size=1000)
 
-    print("\n" + "=" * 80)
-    print("PIPELINE COMPLETED SUCCESSFULLY")
-    print("=" * 80)
+    print("Pipe completed successfully!")
 
 
 if __name__ == "__main__":
