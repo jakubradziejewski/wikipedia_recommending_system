@@ -3,9 +3,7 @@ from src.utils.visualization import plot_contribution_analysis, plot_distinctive
 
 
 def analyze_term_distinctiveness(engine, query_indices, distinctive_term_indices):
-    """
-    Analyze distinctiveness for multiple terms at once using vectorized operations.
-    """
+    """Analyze distinctiveness for multiple terms at once using vectorized operations."""
 
     # Get subset of tfidf matrix matching columns with distinctive terms
     term_vectors = engine.tfidf_matrix[:, distinctive_term_indices].toarray()
@@ -43,9 +41,7 @@ def analyze_term_distinctiveness(engine, query_indices, distinctive_term_indices
 
 
 def explain_prediction_contributions(query_vec, rec_vec, feature_names, top_n=5):
-    """
-    Explain which terms contributed most to the similarity between query and recommendation.
-    """
+    """Explain which terms contributed most to the similarity between query and recommendation."""
 
     # Combination of the impact of term importance in both vectors - query and recommendation
     contributions = query_vec * rec_vec
@@ -78,9 +74,7 @@ def explainability_analysis(
         top_n_terms=5,
         top_distinctive_terms=20
 ):
-    """
-    Performs explainability analysis on recommendations.
-    """
+    """Performs explainability analysis on recommendations."""
     if engine.tfidf_matrix is None:
         raise ValueError("TF-IDF model not built. Call build_tfidf_model() first.")
 

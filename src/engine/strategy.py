@@ -2,6 +2,7 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from src.analysis.explainability import explainability_analysis
 
+
 def compute_internal_coherence(matrix):
     """Compute average cosine similarity within a collection of article vectors."""
     sim_matrix = cosine_similarity(matrix)
@@ -30,7 +31,7 @@ def generate_recommendations(engine, titles, label="Top Recommendations"):
 
 def random_strategy(engine, num_articles):
     """Strategy 1: Random Article Collection"""
-    print("\n1. Random Article Collection")
+    print("\n1. Random Article Collection - selecting articles randomly from the corpus\n")
     indices = np.random.choice(len(engine.df), size=num_articles, replace=False)
     titles = engine.df.iloc[indices]['title'].tolist()
 
@@ -45,6 +46,8 @@ def random_strategy(engine, num_articles):
 def similar_strategy(engine, num_articles):
     """Strategy 2: Similar Article Collection"""
     print("\n2. Similar Article Collection (based on randomly chosen seed article)")
+    print(
+        "Building query list based on most similar articles to the seed, imitating a collection user might saw during the search.\n")
     seed_idx = np.random.choice(len(engine.df))
     seed_title = engine.df.iloc[seed_idx]['title']
     print(f"\nSeed article: {seed_title}")
@@ -69,8 +72,10 @@ def similar_strategy(engine, num_articles):
 def recursive_strategy(engine, num_articles):
     """Strategy 3: Recursive Query Expansion"""
     print("\n3. Recursive Query Expansion Strategy")
-    print("Building query list step-by-step based on most similar previous selections.")
+    print(
+        "Building query list step-by-step based on most similar previous selections. Every step adds the most similar article to the already selected articles simulating user actions.\n")
 
+    # Randomly select the first article - seed
     seed_idx = np.random.choice(len(engine.df))
     indices = [seed_idx]
     titles = [engine.df.iloc[seed_idx]['title']]
@@ -95,17 +100,7 @@ def recursive_strategy(engine, num_articles):
 
 
 def compare_recommendation_strategies(engine, num_articles=10, run_explainability=True):
-    """
-    Compare recommendations from multiple query selection strategies.
-
-    Args:
-        engine: ArticleSimilarityEngine instance
-        num_articles: Number of articles to use in query set
-        run_explainability: Whether to run deep explainability analysis on all strategies
-
-    Returns:
-        dict: Results from all strategies
-    """
+    """Compare recommendations from multiple query selection strategies."""
     print("\nApproaches of recommendation based on different query article selection strategies:")
 
     # Run each strategy modularly
@@ -141,7 +136,7 @@ def compare_recommendation_strategies(engine, num_articles=10, run_explainabilit
 
     # Final summary comparison
     print("\n" + "=" * 80)
-    print("STRATEGY COMPARISON SUMMARY")
+    print("Comparison of use cases -  different recommendation strategies")
     print("=" * 80)
 
     print(f"\nInternal Coherence within query articles:")
@@ -159,11 +154,8 @@ def compare_recommendation_strategies(engine, num_articles=10, run_explainabilit
     print(f"  Similar  : {similar_data['recs']['similarity_score'].mean():.4f}")
     print(f"  Recursive: {recursive_data['recs']['similarity_score'].mean():.4f}")
 
-
-
     return {
         'random': random_data,
         'similar': similar_data,
         'recursive': recursive_data
     }
-
