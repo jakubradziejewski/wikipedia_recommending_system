@@ -46,17 +46,17 @@ def explain_prediction_contributions(query_vec, rec_vec, feature_names, top_n=5)
     """
     Explain which terms contributed most to the similarity between query and recommendation.
     """
-    # Element-wise product gives the contribution
+
+    # Combination of the impact of term importance in both vectors - query and recommendation
     contributions = query_vec * rec_vec
 
-    # Get top contributing terms (vectorized)
+    # Get top contributing terms
     top_indices = np.argpartition(contributions, -top_n)[-top_n:]
     top_indices = top_indices[np.argsort(contributions[top_indices])[::-1]]
 
     # Filter only positive contributions
     top_indices = top_indices[contributions[top_indices] > 0]
 
-    # Build contributors list
     contributors = []
     for idx in top_indices:
         contrib_value = contributions[idx]
@@ -89,14 +89,14 @@ def explainability_analysis(
     query_indices = [i for i in query_indices if i is not None]
 
     if not query_indices or top_recommendations.empty:
-        print("⚠ Could not perform deep analysis - missing data.")
+        print("⚠ Could not perform explainability analysis - missing data.")
         return {}
 
     print(f"Explainability analysis using {strategy_name}")
     print(f"Query articles: {len(query_indices)}")
     print(f"Recommendations to analyze: {len(top_recommendations)}")
 
-    # Compute query vector once
+    # Compute vector for all articles used in query
     query_vec = np.asarray(engine.tfidf_matrix[query_indices].mean(axis=0)).flatten()
 
     # Find distinctive terms
@@ -107,7 +107,7 @@ def explainability_analysis(
         print("⚠ No terms found in query vector!")
         return {}
 
-    # Analyze all nonzero terms at once (vectorized)
+    # Find distinctive terms, specific to this query set
     distinctive_terms = analyze_term_distinctiveness(engine, query_indices, nonzero_indices)
 
     # Filter and sort by enrichment
@@ -164,7 +164,6 @@ def explainability_analysis(
 
         # Sort by contribution
         term_matches.sort(key=lambda x: x['contribution'], reverse=True)
-
 
         analyses.append({
             'rank': rank,
