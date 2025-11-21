@@ -94,6 +94,8 @@ class ArticleSimilarityEngine:
 
         results_df = self.df.copy()
         results_df['similarity_score'] = similarities
+        # Exclude query articles from results
+        results_df = results_df.drop(query_indices)
         # Sort by similarity and get top-k
         results_df = results_df.sort_values('similarity_score', ascending=False).head(top_k)
 

@@ -11,7 +11,6 @@ from src.analysis.statistics import generate_model_statistics
 from src.engine.strategy import compare_recommendation_strategies
 
 
-
 def main():
     print("=" * 80)
     print("WIKIPEDIA ARTICLE PIPELINE — SCRAPE → ANALYZE → SIMILARITY")
@@ -23,8 +22,8 @@ def main():
     if os.path.exists(data_path):
         print(f"✓ Found existing dataset: {data_path}")
     else:
-        print("⚠ No dataset found.")
-        print("→ Starting Wikipedia crawl to create dataset...\n")
+        print("No dataset found.")
+        print("--> Starting Wikipedia crawl to create dataset...\n")
 
         os.makedirs("data", exist_ok=True)
         logging.getLogger("scrapy").setLevel(logging.ERROR)
@@ -45,7 +44,6 @@ def main():
 
     # Step 5: Compare recommendation strategies
     compare_recommendation_strategies(engine, num_articles=10)
-
 
     print("Pipe completed successfully!")
 
