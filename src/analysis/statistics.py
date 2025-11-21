@@ -1,8 +1,9 @@
-# engine/statistics.py
 import numpy as np
 import os
 import pandas as pd
 from collections import Counter
+from sklearn.metrics.pairwise import cosine_similarity
+from src.utils.visualization import plot_similarity_distribution
 
 
 def perform_text_analysis(parquet_file="data/wikipedia_articles.parquet"):
@@ -47,7 +48,6 @@ def perform_text_analysis(parquet_file="data/wikipedia_articles.parquet"):
     print(f"Unique lemmas: {len(set(all_lemmas)):,}")
     print(f"Total word occurrences: {len(all_tokens):,}")
 
-
     print(f"\n Top 12 most frequent Tokens, Stems, and Lemmas with their Count:")
     token_freq = Counter(all_tokens)
     stem_freq = Counter(all_stems)
@@ -83,6 +83,7 @@ def perform_text_analysis(parquet_file="data/wikipedia_articles.parquet"):
     print(f"Vocabulary reduction through stemming: {vocab_reduction_stem:.1f}%")
     print(f"Vocabulary reduction through lemmatization: {vocab_reduction_lemma:.1f}%")
 
+
 def generate_model_statistics(engine):
     """Generate comprehensive statistics and visualizations for the article corpus"""
 
@@ -91,17 +92,35 @@ def generate_model_statistics(engine):
         engine.build_tfidf_model()
 
     tfidf = engine.tfidf_matrix
-    df = engine.df
 
     # 1. TF-IDF Statistics
     print("\n" + "-" * 80)
     print("TF-IDF MODEL STATISTICS")
     print("-" * 80)
-    print(f"Total documents: {tfidf.shape[0]:,}")
-    print(f"Vocabulary size: {tfidf.shape[1]:,}")
+    num_docs = engine.tfidf_matrix.shape[0]
+    num_terms = engine.tfidf_matrix.shape[1]
+    print(f"Number of documents (articles): {num_docs}")
+    print(f"Number of unique features (terms/n-grams): {num_terms}")
     density = tfidf.nnz / (tfidf.shape[0] * tfidf.shape[1])
     print(f"Matrix density: {density:.4%}")
     print(f"Non-zero elements: {tfidf.nnz:,}")
+
+    # Calculate full pairwise similarity matrix
+    print("\nCalculating full corpus pairwise similarity matrix (might take a moment)...")
+    similarity_matrix = cosine_similarity(engine.tfidf_matrix)
+
+    # Create directories for plots
+    os.makedirs('../plots', exist_ok=True)
+
+    # Call the new visualization function
+    mean_sim, median_sim = plot_similarity_distribution(
+        similarity_matrix,
+        save_path='../plots/similarity_distribution.png'
+    )
+
+    print("\nCorpus Similarity Statistics:")
+    print(f"  Mean pairwise similarity: {mean_sim:.4f}")
+    print(f"  Median pairwise similarity: {median_sim:.4f}")
 
     # 2. Top TF-IDF terms across corpus
     print("\n" + "-" * 80)

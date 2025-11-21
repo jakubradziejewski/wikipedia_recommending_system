@@ -4,7 +4,6 @@ import numpy as np
 import urllib.parse
 import textwrap
 
-
 def plot_contribution_analysis(articles_analysis, strategy_name="Strategy", save_path=None):
     """
     Visualize the most impactful 5 terms which made an article be recommended using horizontal stacked bars.
@@ -229,3 +228,49 @@ def plot_distinctive_term_frequency(analyses, distinctive_terms, strategy_name="
 
     plt.savefig(save_path, dpi=300, bbox_inches='tight')
     print(f"\nRare terms contribution plot saved to: {save_path}")
+
+def plot_similarity_distribution(similarity_matrix, save_path=None):
+    """
+    Visualize the distribution of pairwise cosine similarities in the corpus.
+    The distribution is calculated from the upper triangle of the similarity matrix
+    (excluding the diagonal).
+    """
+    # Extract pairwise similarities from the upper triangle (k=1 excludes diagonal)
+    similarities = similarity_matrix[np.triu_indices_from(similarity_matrix, k=1)]
+
+    mean_sim = np.mean(similarities)
+    median_sim = np.median(similarities)
+    max_sim = np.max(similarities)
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    sns.histplot(similarities, bins=100, kde=True, ax=ax, color='skyblue', edgecolor='black')
+
+    ax.axvline(mean_sim, color='red', linestyle='--', linewidth=1.5,
+               label=f'Mean: {mean_sim:.4f}')
+    ax.axvline(median_sim, color='green', linestyle='-', linewidth=1.5,
+               label=f'Median: {median_sim:.4f}')
+
+    ax.set_title('Distribution of All Pairwise Cosine Similarities in Corpus',
+                 fontsize=14, fontweight='bold', pad=15)
+    ax.set_xlabel('Cosine Similarity Score', fontsize=12)
+    ax.set_ylabel('Frequency', fontsize=12)
+    ax.legend()
+
+    text_summary = (
+        f"Total pairs: {len(similarities):,}\n"
+        f"Mean pairwise similarity: {mean_sim:.4f}\n"
+        f"Median pairwise similarity: {median_sim:.4f}\n"
+        f"Maximum similarity: {max_sim:.4f}"
+    )
+    ax.text(0.95, 0.95, text_summary, transform=ax.transAxes,
+            fontsize=10, verticalalignment='top', horizontalalignment='right',
+            bbox=dict(boxstyle='round,pad=0.5', facecolor='white', alpha=0.7))
+
+    plt.tight_layout()
+
+    if save_path:
+        plt.savefig(save_path, dpi=300)
+        print(f"\nSimilarity distribution plot saved to: {save_path}")
+
+    return mean_sim, median_sim

@@ -27,6 +27,7 @@ def generate_recommendations(engine, titles, label="Top Recommendations", verbos
     if verbose:
         print(f"\n{label}:")
         for _, row in recs.iterrows():
+            row['title']=urllib.parse.unquote(row['title'])
             print(f"  {row['title'][:55]:55s} | Score: {row['similarity_score']:.4f}")
     return recs
 
