@@ -95,7 +95,7 @@ def plot_contribution_analysis(articles_analysis, strategy_name="Strategy", save
                 bbox=dict(boxstyle='round,pad=0.4',
                           facecolor='lightyellow', alpha=0.8, edgecolor='red'))
 
-    # Set y-axis labels with FULL article titles (wrapped to multiple lines)
+    # Set y-axis labels with full article titles (wrapped to multiple lines)
     y_labels = []
     for a in articles_analysis:
         title = urllib.parse.unquote(a['title'])
@@ -130,7 +130,7 @@ def plot_contribution_analysis(articles_analysis, strategy_name="Strategy", save
 
 def plot_distinctive_term_frequency(analyses, distinctive_terms, strategy_name="Strategy", save_path=None):
     """
-    Visualize contribution of 10 rarest terms to each recommended article.
+    Visualize contribution of 20 rarest terms to each recommended article.
     """
     if not analyses or not distinctive_terms:
         print("No data to visualize.")

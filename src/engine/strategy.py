@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from src.analysis.explainability import explainability_analysis
-
+import urllib
 
 def compute_internal_coherence(matrix):
     """Compute average cosine similarity within a collection of article vectors."""
@@ -13,6 +13,7 @@ def print_article_list(titles, similarities=None, label="Articles"):
     """Print formatted list of article titles, optionally with similarity scores."""
     print(f"\n{label}:")
     for i, title in enumerate(titles, 1):
+        title = urllib.parse.unquote(title)
         if similarities is not None:
             print(f"  {i:2d}. {title} (similarity: {similarities[i - 1]:.4f})")
         else:
