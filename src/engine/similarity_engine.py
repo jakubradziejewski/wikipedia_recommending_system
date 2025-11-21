@@ -29,7 +29,7 @@ class ArticleSimilarityEngine:
 
         print("Engine initialized successfully\n")
 
-    def build_tfidf_model(self, max_features):
+    def build_tfidf_model(self):
         """Build TF-IDF model from the article corpus"""
 
         print("Building TF-IDF Model")
@@ -38,12 +38,10 @@ class ArticleSimilarityEngine:
         text_column = 'lemmas'
         texts = self.df[text_column].fillna('')
 
-        print(f"Max features: {max_features}")
         print(f"Documents: {len(texts)}")
 
         # Create TF-IDF vectorizer
         self.vectorizer = TfidfVectorizer(
-            max_features=max_features,
             ngram_range=(1, 2), # also includes double word phrases, can be changed to (1,1) for single words only
             min_df=15,  # Ignore terms that appear in less than 15 documents
             max_df=0.60,  # Ignore terms that appear in more than 60% of documents

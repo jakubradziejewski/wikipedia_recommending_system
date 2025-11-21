@@ -105,7 +105,7 @@ def compare_recommendation_strategies(engine, num_articles=10, run_explainabilit
 
     # Run each strategy modularly
     random_data = random_strategy(engine, num_articles)
-    similar_data = similar_strategy(engine, num_articles)
+    similar_data = similar_strategy(engine, num_articles-1)
     recursive_data = recursive_strategy(engine, num_articles)
 
     # Optional: Run deep explainability on all strategies

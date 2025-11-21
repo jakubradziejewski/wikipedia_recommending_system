@@ -37,7 +37,7 @@ def main():
     # Step 3: Build similarity engine
     print("Building Article Similarity Engine using Text after Lemmatization\n")
     engine = ArticleSimilarityEngine(data_path)
-    engine.build_tfidf_model(max_features=20000)
+    engine.build_tfidf_model()
 
     # Step 4: Generate statistics
     generate_model_statistics(engine)
