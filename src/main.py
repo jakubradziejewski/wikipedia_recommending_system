@@ -42,8 +42,8 @@ def main():
     # Step 4: Generate statistics
     generate_model_statistics(engine)
 
-    # Step 5: Compare recommendation strategies
-    compare_recommendation_strategies(engine, num_articles=10)
+    # Step 5: Compare recommendation strategies, change number of trials to average results
+    compare_recommendation_strategies(engine, num_articles=10, run_explainability=True, num_trials=1)
 
     print("Pipe completed successfully!")
 
