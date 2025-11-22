@@ -1,8 +1,7 @@
-# Scrapy settings for wikipedia_spider
+### Scrapy settings for wikipedia_spider
 
 BOT_NAME = 'wikipedia_spider'
 SPIDER_MODULES = ['src.spider']
-NEWSPIDER_MODULE = 'src.spider'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
@@ -14,7 +13,7 @@ CONCURRENT_REQUESTS = 16
 DOWNLOAD_DELAY = 0.25
 COOKIES_ENABLED = False
 
-# Disable Telnet Console (enabled by default)
+# Disable Telnet Console 
 TELNETCONSOLE_ENABLED = False
 
 # BFS Queue Settings
@@ -22,7 +21,7 @@ DEPTH_PRIORITY = 1
 SCHEDULER_DISK_QUEUE = 'scrapy.squeues.PickleFifoDiskQueue'
 SCHEDULER_MEMORY_QUEUE = 'scrapy.squeues.FifoMemoryQueue'
 
-# Pipelines (Processing -> Export)
+# Pipelines (first TextProcessing, then ParquetExport)
 ITEM_PIPELINES = {
    'src.spider.pipelines.TextProcessingPipeline': 300,
    'src.spider.pipelines.ParquetExportPipeline': 400,

@@ -1,3 +1,5 @@
+### This code defines the data structure for storing Wikipedia article inside the scraper before saving to the file.
+
 import scrapy
 
 class WikipediaArticleItem(scrapy.Item):

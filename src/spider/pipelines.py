@@ -1,13 +1,15 @@
+### This file defines the pipelines for processing scraped Wikipedia articles.
+### Every item (not new requests) which is yielded from parse() method goes through TextProcessingPipeline first, then ParquetExportPipeline.
+
 import pandas as pd
 import os
 from datetime import datetime
-# Absolute import based on your src folder structure
+# Import the TextProcessor from the processing module which handles tokenization, stemming, and lemmatization
 from src.processing.text_processor import TextProcessor
 
 class TextProcessingPipeline:
     """
-    Intercepts the item, runs it through TextProcessor,
-    and populates the linguistic fields.
+    Intercepts the item, runs it through TextProcessor, and populates the fields which weren't populated yet.
     """
     def __init__(self):
         self.processor = TextProcessor()
@@ -30,8 +32,7 @@ class TextProcessingPipeline:
 
 class ParquetExportPipeline:
     """
-    Collects all items in memory and saves them to a Parquet file
-    when the spider closes.
+    Collects all items in memory and saves them to a Parquet file when the spider closes.
     """
     def __init__(self):
         self.items = []
@@ -46,7 +47,7 @@ class ParquetExportPipeline:
         if self.items:
             df = pd.DataFrame(self.items)
             
-            # Ensure data directory exists (as required by main.py Step #1)
+            # Ensure data directory exists
             os.makedirs('data', exist_ok=True)
             output_file = 'data/wikipedia_articles.parquet'
             
