@@ -7,10 +7,10 @@ SPIDER_MODULES = ['src.spider']
 ROBOTSTXT_OBEY = True
 
 # Configure maximum concurrent requests
-CONCURRENT_REQUESTS = 16
+CONCURRENT_REQUESTS = 32
 
 # Configure a delay for requests for the same website (default: 0)
-DOWNLOAD_DELAY = 0.25
+DOWNLOAD_DELAY = 0.1
 COOKIES_ENABLED = False
 
 # Disable Telnet Console 

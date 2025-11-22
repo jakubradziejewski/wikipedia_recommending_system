@@ -6,7 +6,7 @@ from nltk.corpus import stopwords, wordnet
 from nltk.tokenize import word_tokenize
 
 # Download required NLTK data
-for pkg in ['punkt', 'wordnet', 'stopwords', 'averaged_perceptron_tagger']:
+for pkg in ['punkt', 'wordnet', 'stopwords', 'averaged_perceptron_tagger_eng']:
     try:
         nltk.download(pkg, quiet=True)
     except:
