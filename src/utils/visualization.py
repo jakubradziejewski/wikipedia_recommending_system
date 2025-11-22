@@ -98,7 +98,7 @@ def plot_contribution_analysis(articles_analysis, strategy_name="Strategy", save
     y_labels = []
     for a in articles_analysis:
         title = urllib.parse.unquote(a['title'])
-        # Wrap title to ~80 characters per line
+        # Wrap title to ~50 characters per line
         wrapped = '\n'.join(textwrap.wrap(f"#{a['rank']}  {title}", width=50))
         y_labels.append(wrapped)
 

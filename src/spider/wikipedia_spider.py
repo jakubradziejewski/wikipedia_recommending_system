@@ -30,13 +30,13 @@ class WikipediaSpider(scrapy.Spider):
         self.start_time = datetime.now()
 
     def parse(self, response):
-        # 1. Check Limits
-        if self.pages_scraped >= self.max_pages:
-            raise CloseSpider('Reached maximum pages limit')
-
+        # 1. Check if URL already visited or max pages reached
         url = response.url
         if url in self.visited_urls:
             return
+
+        if self.pages_scraped > self.max_pages:
+            raise CloseSpider('Reached maximum pages limit')
 
         self.visited_urls.add(url)
         self.pages_scraped += 1
@@ -95,6 +95,7 @@ class WikipediaSpider(scrapy.Spider):
             
             valid_links = list(set(valid_links))
             random.shuffle(valid_links)
+
             
             # Schedule next requests
             for next_url in valid_links[:self.max_links_per_page]:

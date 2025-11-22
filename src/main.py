@@ -43,7 +43,7 @@ def main():
     generate_model_statistics(engine)
 
     # Step 5: Compare recommendation strategies, change number of trials to average results
-    compare_recommendation_strategies(engine, num_articles=10, run_explainability=True, num_trials=1)
+    compare_recommendation_strategies(engine, num_articles=10, run_explainability=True, num_trials=100)
 
     print("Pipe completed successfully!")
 
