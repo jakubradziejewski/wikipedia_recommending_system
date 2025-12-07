@@ -35,8 +35,3 @@ The project's core logic is organized into three distinct phases within the `src
 | **`statistics.py`** | Generates corpus statistics, including matrix density, feature counts, article text length metrics, and visualization of the **corpus-wide pairwise similarity distribution**. | **Pandas, scikit-learn** |
 | **`strategy.py`** | Defines and compares different recommendation strategies (e.g., Random, Similar, Recursive) and calculates performance metrics like **internal coherence**. | **scikit-learn** |
 | **`explainability.py`** | Calculates and plots the **element-wise contribution** of individual TF-IDF terms to the final similarity score, allowing for interpretation of the recommendation rationale. | **numpy, Matplotlib** |
-
----
-
-
-[Insert Project License Here]
