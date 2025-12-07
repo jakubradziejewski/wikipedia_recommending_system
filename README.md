@@ -38,6 +38,5 @@ The project's core logic is organized into three distinct phases within the `src
 
 ---
 
-## License
 
 [Insert Project License Here]
