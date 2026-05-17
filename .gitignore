@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+build/
+dist/
+.eggs/
+pip-wheel-metadata/
+
+# Virtual environments
+.venv/
+venv/
+env/
+.python-version
+
+# Type checkers / linters
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Project runtime artifacts — produced by the pipeline, never committed
+data/*
+!data/.gitkeep
+plots/*
+!plots/.gitkeep
+
+# Scrapy runtime state
+.scrapy/
+
+# NLTK auto-download dirs (when running outside Docker)
+nltk_data/
+
+# Editor / OS
+.idea/
+.vscode/
+.DS_Store
+
+# Environment files (the .env.example template is committed)
+.env
+.env.local
+
+# Logs
+*.log

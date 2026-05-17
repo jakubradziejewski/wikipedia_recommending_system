@@ -1,13 +1,17 @@
-### This code defines the data structure for storing Wikipedia article inside the scraper before saving to the file.
+"""Scrapy item shape produced by the spider and consumed by the pipelines."""
+
+from __future__ import annotations
 
 import scrapy
 
+
 class WikipediaArticleItem(scrapy.Item):
+    # Spider-populated
     url = scrapy.Field()
     title = scrapy.Field()
     original_text = scrapy.Field()
-    
-    # Fields populated by the pipeline
+
+    # Pipeline-populated by TextProcessingPipeline
     tokens = scrapy.Field()
     stems = scrapy.Field()
     lemmas = scrapy.Field()

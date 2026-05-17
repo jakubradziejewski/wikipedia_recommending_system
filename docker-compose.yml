@@ -1,0 +1,17 @@
+# One service, run on-demand. `docker compose up` would imply a long-running
+# process; for this batch pipeline use `docker compose run --rm pipeline <cmd>`.
+services:
+  pipeline:
+    build: .
+    image: wiki-recommender:local
+    # Bind-mount runtime artifacts so the produced parquet and plots appear
+    # on the host instead of being hidden inside a named volume.
+    volumes:
+      - ./data:/app/data
+      - ./plots:/app/plots
+    env_file:
+      - path: .env
+        required: false
+    # Default to the convenience pipeline subcommand; override with positional
+    # args: `docker compose run --rm pipeline scrape --max-pages 1000`.
+    command: ["pipeline"]

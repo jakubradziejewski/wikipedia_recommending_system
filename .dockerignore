@@ -1,0 +1,42 @@
+# Match .gitignore plus things irrelevant inside the container
+
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+.venv/
+venv/
+env/
+
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+.ipynb_checkpoints/
+
+# Runtime artifacts — mounted from the host instead of baked into the image
+data/
+plots/
+.scrapy/
+
+# Local secrets
+.env
+.env.local
+
+# Docs / tests / metadata — keep the image lean
+docs/
+tests/
+*.md
+!README.md
+
+# VCS / editor
+.git/
+.gitignore
+.idea/
+.vscode/
+.DS_Store
+
+# Logs
+*.log
